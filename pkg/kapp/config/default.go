@@ -4,6 +4,9 @@
 package config
 
 import (
+	"fmt"
+
+	"github.com/ghodss/yaml"
 	ctlres "github.com/vmware-tanzu/carvel-kapp/pkg/kapp/resources"
 )
 
@@ -700,10 +703,24 @@ changeRuleBindings:
       - hasNamespaceMatcher: {}
 `
 
-var defaultConfigRes = ctlres.MustNewResourceFromBytes([]byte(defaultConfigYAML))
-
 func NewDefaultConfigString() string { return defaultConfigYAML }
 
 func NewConfFromResourcesWithDefaults(resources []ctlres.Resource) ([]ctlres.Resource, Conf, error) {
-	return NewConfFromResources(append([]ctlres.Resource{defaultConfigRes}, resources...))
+	resources, conf, err := NewConfFromResources(resources)
+	if err != nil {
+		return nil, Conf{}, err
+	}
+
+	var defaultConf Config
+	bs := []byte(defaultConfigYAML)
+	err = yaml.Unmarshal(bs, &defaultConf)
+	if err != nil {
+		return nil, Conf{}, fmt.Errorf("Unmarshaling %w", err)
+	}
+	err = defaultConf.Validate()
+	if err != nil {
+		return nil, Conf{}, fmt.Errorf("Validating config: %w", err)
+	}
+
+	return resources, Conf{append([]Config{defaultConf}, conf.configs...)}, err
 }

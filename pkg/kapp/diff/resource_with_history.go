@@ -153,10 +153,10 @@ func (r ResourceWithHistory) recalculateLastAppliedChange() ([]Change, string, s
 	// Continue to calculate historyless change with excluded fields
 	// (previous kapp versions did so, and we do not want to fallback
 	// to diffing against list resources).
-	recalculatedChange1, err := r.calculateChangePrev1(lastAppliedRes)
-	if err != nil {
-		return nil, "", "" // TODO deal with error?
-	}
+	// recalculatedChange1, err := r.calculateChangePrev1(lastAppliedRes)
+	// if err != nil {
+	//	return nil, "", "" // TODO deal with error?
+	// }
 
 	recalculatedChange2, err := r.CalculateChange(lastAppliedRes)
 	if err != nil {
@@ -165,7 +165,7 @@ func (r ResourceWithHistory) recalculateLastAppliedChange() ([]Change, string, s
 
 	lastAppliedDiff := r.resource.Annotations()[debugAppliedResDiffAnnKey]
 
-	return []Change{recalculatedChange1, recalculatedChange2}, lastAppliedDiffMD5, lastAppliedDiff
+	return []Change{recalculatedChange2}, lastAppliedDiffMD5, lastAppliedDiff
 }
 
 func (r ResourceWithHistory) newExactHistorylessChange(existingRes, newRes ctlres.Resource) (Change, error) {

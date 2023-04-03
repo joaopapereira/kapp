@@ -45,6 +45,7 @@ type ChangeImpl struct {
 
 	configurableTextDiff *ConfigurableTextDiff
 	opsDiff              *OpsDiff
+	changeOpVal          ChangeOp
 }
 
 var _ Change = &ChangeImpl{}
@@ -86,31 +87,41 @@ func (d *ChangeImpl) AppliedResource() ctlres.Resource         { return d.applie
 func (d *ChangeImpl) ClusterOriginalResource() ctlres.Resource { return d.clusterOriginalRes }
 
 func (d *ChangeImpl) Op() ChangeOp {
+	if d.changeOpVal != "" {
+		return d.changeOpVal
+	}
 	if d.newRes != nil {
 		if _, hasNoopAnnotation := d.newRes.Annotations()[ctlres.NoopAnnKey]; hasNoopAnnotation {
-			return ChangeOpNoop
+			d.changeOpVal = ChangeOpNoop
+			return d.changeOpVal
 		}
 	}
 
 	if d.existingRes == nil {
 		if d.newResHasExistsAnnotation() {
-			return ChangeOpExists
+			d.changeOpVal = ChangeOpExists
+			return d.changeOpVal
 		}
-		return ChangeOpAdd
+		d.changeOpVal = ChangeOpAdd
+		return d.changeOpVal
 	}
 
 	if d.newRes == nil {
-		return ChangeOpDelete
+		d.changeOpVal = ChangeOpDelete
+		return d.changeOpVal
 	}
 
 	if d.ConfigurableTextDiff().Full().HasChanges() {
 		if d.newResHasExistsAnnotation() {
-			return ChangeOpKeep
+			d.changeOpVal = ChangeOpKeep
+			return d.changeOpVal
 		}
-		return ChangeOpUpdate
+		d.changeOpVal = ChangeOpUpdate
+		return d.changeOpVal
 	}
 
-	return ChangeOpKeep
+	d.changeOpVal = ChangeOpKeep
+	return d.changeOpVal
 }
 
 func (d *ChangeImpl) IsIgnored() bool { return d.isIgnoredTransient() }
