@@ -45,7 +45,7 @@ snapshot:
 release:
   # Repo in which the release will be created.
   github:
-    owner: carvel-dev
+    owner: joaopapereira
     name: kapp
 
   # If set to true, will not auto-publish the release.
