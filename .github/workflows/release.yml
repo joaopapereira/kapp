@@ -93,6 +93,7 @@ jobs:
           CURRENT_TAG: ${{ steps.version.outputs.TAG_NAME }}
         run: |
           set -e -x
+          VERSION=`echo "$CURRENT_TAG"  | grep -Eo '[0-9].*'`
 
           ./hack/build-binaries.sh "$CURRENT_TAG" > ./go-checksums
           cat ./go-checksums
