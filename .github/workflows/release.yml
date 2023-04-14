@@ -95,7 +95,7 @@ jobs:
           set -e -x
           VERSION=`echo "$CURRENT_TAG"  | grep -Eo '[0-9].*'`
 
-          ./hack/build-binaries.sh "$CURRENT_TAG" > ./go-checksums
+          ./hack/build-binaries.sh "$VERSION" > ./go-checksums
           cat ./go-checksums
           diff ./go-checksums <(cat <<EOF
           ${{steps.get-checksums-from-draft-release.outputs.result}}
